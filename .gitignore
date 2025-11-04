@@ -1,0 +1,22 @@
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Keys and credentials
+*.pem
+*.key
+*.tfvars
+
+# Python / Node / etc (optional safety)
+__pycache__/
+node_modules/
+
+# OS
+.DS_Store
