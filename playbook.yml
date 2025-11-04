@@ -1,0 +1,57 @@
+---
+- name: Configure EC2 instance with Docker
+  hosts: webserver
+  become: true
+
+  tasks:
+    - name: Update all packages
+      yum:
+        name: "*"
+        state: latest
+
+    - name: Install required system packages
+      yum:
+        name:
+          - docker
+          - python3-pip
+        state: present
+
+    - name: Enable Docker service
+      systemd:
+        name: docker
+        enabled: true
+
+    - name: Start Docker service
+      systemd:
+        name: docker
+        state: started
+
+    - name: Add ec2-user to docker group
+      user:
+        name: ec2-user
+        groups: docker
+        append: yes
+
+    - name: Check Docker version
+      command: docker --version
+      register: docker_version_output
+
+    - name: Display Docker version
+      debug:
+        msg: "{{ docker_version_output.stdout }}"
+
+    # -----------------------------
+    # 7. Deploy Sample Docker Web App
+    # -----------------------------
+    - name: Copy web application files to server
+      copy:
+        src: ../webapp/
+        dest: /home/ec2-user/webapp/
+        owner: ec2-user
+        mode: "0755"
+
+    - name: Build Docker image
+      command: docker build -t softora-webapp /home/ec2-user/webapp/
+
+    - name: Run Docker container
+      command: docker run -d -p 80:80 --name webapp softora-webapp
